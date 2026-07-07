@@ -72,6 +72,12 @@
     .audio-status{font-size:.72rem;font-weight:800;color:var(--muted);background:#f1f5f9;border-radius:999px;padding:.25rem .55rem;white-space:nowrap}
     .audio-item.active .audio-status{background:#ccfbf1;color:var(--primary)}
     .audio-desc{font-size:.82rem;color:var(--muted);line-height:1.5}
+    .audio-dropdown-wrap{border:1px solid #99f6e4;background:linear-gradient(180deg,#ffffff,#f0fdfa);border-radius:22px;padding:1rem;box-shadow:var(--shadow-sm)}
+    .audio-dropdown-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);font-weight:800;margin-bottom:.45rem}
+    .audio-dropdown{border:1px solid var(--line);border-radius:16px;padding:.88rem 1rem;font-weight:800;color:var(--text);box-shadow:none}
+    .audio-dropdown:focus{border-color:var(--primary);box-shadow:0 0 0 .22rem rgba(20,184,166,.16)}
+    .audio-summary{display:flex;align-items:flex-start;gap:.75rem;background:#fff;border:1px solid var(--line);border-radius:18px;padding:.9rem;margin-top:.85rem;color:var(--muted);line-height:1.55}
+    .audio-summary i{color:var(--primary);font-size:1.1rem;margin-top:.05rem}
     .selected-box{border:1px solid #99f6e4;background:#f0fdfa;border-radius:20px;padding:1rem;margin-bottom:1rem}
     .selected-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);font-weight:800;margin-bottom:.2rem}
     .selected-name{font-weight:800;font-size:1.05rem;color:#0f172a}
@@ -83,6 +89,11 @@
     .empty-icon{width:82px;height:82px;border-radius:30px;background:#f1f5f9;color:#94a3b8;display:grid;place-items:center;font-size:2rem;margin:0 auto 1rem}
     .loading-box{text-align:center;display:none;padding:2rem 1rem}
     .loader{width:56px;height:56px;border-radius:50%;border:5px solid #ccfbf1;border-top-color:var(--primary);animation:spin 1s linear infinite;margin:0 auto 1rem}@keyframes spin{to{transform:rotate(360deg)}}
+    .progress-wrap{max-width:360px;margin:1.1rem auto 0;text-align:left}
+    .progress-track{height:12px;background:#e2e8f0;border-radius:999px;overflow:hidden;border:1px solid #dbeafe}
+    .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--primary-2));border-radius:999px;transition:width .25s ease}
+    .progress-meta{display:flex;justify-content:space-between;gap:1rem;margin-top:.55rem;font-size:.82rem;color:var(--muted);font-weight:700}
+    .progress-step{text-align:center;color:var(--primary);font-weight:800;font-size:.88rem;margin-top:.75rem}
     .result-content{display:none}
     .result-image{width:100%;max-width:390px;display:block;margin:0 auto 1.25rem;border-radius:24px;border:1px solid #ccfbf1;background:#f8fafc}
     .result-badge{display:inline-flex;align-items:center;gap:.45rem;background:#ecfeff;color:var(--primary);border:1px solid #99f6e4;border-radius:999px;padding:.4rem .7rem;font-weight:800;font-size:.84rem;margin-bottom:.75rem}
@@ -170,12 +181,21 @@
     <section id="pilih-audio">
       <div class="container">
         <h2 class="section-title">Pilih audio tangisan bayi</h2>
-        <p class="section-desc">Bagian ini berisi daftar audio yang sudah disediakan sebagai input. Pilih satu audio, kemudian tekan tombol klasifikasi.</p>
+        <p class="section-desc">Bagian ini berisi pilihan audio yang sudah disediakan sebagai input. Pilih satu audio melalui dropdown, kemudian tekan tombol klasifikasi.</p>
         <div class="row g-4 align-items-start">
           <div class="col-lg-7">
             <div class="app-card app-card-lg">
               <div class="card-title-custom"><i class="bi bi-music-note-beamed"></i> Daftar Audio</div>
-              <div id="audio-list" class="audio-list"></div>
+              <div class="audio-dropdown-wrap">
+                <div class="audio-dropdown-label">Pilih file audio</div>
+                <select id="audio-select" class="form-select audio-dropdown" aria-label="Pilih audio tangisan bayi">
+                  <option value="" selected>Pilih salah satu audio yang tersedia</option>
+                </select>
+                <div class="audio-summary" id="audio-summary">
+                  <i class="bi bi-info-circle-fill"></i>
+                  <span>Daftar audio dibuat dalam bentuk dropdown agar lebih ringkas, terutama saat dibuka melalui layar HP.</span>
+                </div>
+              </div>
             </div>
           </div>
           <div class="col-lg-5">
@@ -208,6 +228,14 @@
             <div class="loader"></div>
             <h5 class="fw-bold">Memproses audio...</h5>
             <p class="text-muted mb-0">Mohon tunggu beberapa detik.</p>
+            <div class="progress-wrap">
+              <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+              <div class="progress-meta">
+                <span id="progress-percent">0%</span>
+                <span id="progress-timer">0.0 detik</span>
+              </div>
+              <div class="progress-step" id="progress-step">Menyiapkan proses...</div>
+            </div>
           </div>
           <div class="result-content" id="result-content">
             <div class="text-center">
@@ -277,23 +305,25 @@
     let audioBuffer = null;
     let selectedAudio = null;
 
-    const audioListEl = document.getElementById('audio-list');
+    const audioSelectEl = document.getElementById('audio-select');
+    const audioSummaryEl = document.getElementById('audio-summary');
     const selectedNameEl = document.getElementById('selected-name');
     const audioPlayerEl = document.getElementById('audio-player');
     const classifyBtn = document.getElementById('classify-btn');
+    const progressFillEl = document.getElementById('progress-fill');
+    const progressPercentEl = document.getElementById('progress-percent');
+    const progressTimerEl = document.getElementById('progress-timer');
+    const progressStepEl = document.getElementById('progress-step');
+    let progressInterval = null;
+    let progressStartTime = 0;
+    let progressValue = 0;
 
     function renderAudioList(){
-      audioListEl.innerHTML = AUDIO_SAMPLES.map(item => `
-        <button type="button" class="audio-item" data-audio-id="${item.id}">
-          <div class="audio-item-head">
-            <span class="audio-number">${item.title}</span>
-            <span class="audio-status">Pilih</span>
-          </div>
-          <div class="audio-desc">Klik untuk menggunakan audio ini sebagai input klasifikasi.</div>
-        </button>
-      `).join('');
-      document.querySelectorAll('[data-audio-id]').forEach(button=>{
-        button.addEventListener('click',()=>selectAudio(Number(button.dataset.audioId)));
+      audioSelectEl.innerHTML = '<option value="" selected>Pilih salah satu audio yang tersedia</option>' +
+        AUDIO_SAMPLES.map(item => `<option value="${item.id}">${item.title}</option>`).join('');
+      audioSelectEl.addEventListener('change',()=>{
+        const id = Number(audioSelectEl.value);
+        if(id) selectAudio(id);
       });
     }
 
@@ -314,10 +344,8 @@
       selectedAudio = item;
       classifyBtn.disabled = true;
       classifyBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Memuat Audio...';
-      document.querySelectorAll('.audio-item').forEach(btn=>{
-        btn.classList.toggle('active', Number(btn.dataset.audioId)===id);
-        btn.querySelector('.audio-status').textContent = Number(btn.dataset.audioId)===id ? 'Terpilih' : 'Pilih';
-      });
+      audioSelectEl.value = String(id);
+      audioSummaryEl.innerHTML = `<i class="bi bi-check-circle-fill"></i><span><strong>${item.title}</strong> sudah dipilih sebagai input klasifikasi.</span>`;
       selectedNameEl.textContent = item.title;
       audioPlayerEl.src = item.file;
       audioPlayerEl.style.display = 'block';
@@ -397,14 +425,38 @@
       return {melSpec, mn, rng};
     }
 
+    function setProgress(value, stepText){
+      progressValue = Math.max(0, Math.min(100, value));
+      if(progressFillEl) progressFillEl.style.width = `${progressValue}%`;
+      if(progressPercentEl) progressPercentEl.textContent = `${Math.round(progressValue)}%`;
+      if(stepText && progressStepEl) progressStepEl.textContent = stepText;
+    }
+
+    function startProgress(stepText='Menyiapkan proses...'){
+      stopProgress(false);
+      progressStartTime = performance.now();
+      setProgress(8, stepText);
+      if(progressTimerEl) progressTimerEl.textContent = '0.0 detik';
+      progressInterval = setInterval(()=>{
+        const elapsed = (performance.now() - progressStartTime) / 1000;
+        if(progressTimerEl) progressTimerEl.textContent = `${elapsed.toFixed(1)} detik`;
+        if(progressValue < 90){
+          const nextValue = progressValue + (progressValue < 45 ? 3 : 1.2);
+          setProgress(Math.min(nextValue, 90));
+        }
+      }, 300);
+    }
+
+    function stopProgress(complete=true){
+      if(progressInterval){
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+      if(complete) setProgress(100, 'Selesai menampilkan hasil.');
+    }
+
     async function classifyAudio(){
       if(!audioBuffer) return;
-      if(!model){
-        classifyBtn.disabled = true;
-        classifyBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyiapkan Sistem...';
-        await loadMainModel();
-      }
-      if(!model) return;
 
       showLoading();
       classifyBtn.disabled = true;
@@ -412,7 +464,21 @@
       await new Promise(resolve=>setTimeout(resolve,120));
 
       try{
+        if(!model){
+          setProgress(18, 'Menyiapkan model klasifikasi...');
+          classifyBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyiapkan Sistem...';
+          await loadMainModel();
+        }
+        if(!model){
+          showEmpty();
+          return;
+        }
+
+        setProgress(38, 'Membaca fitur audio...');
+        await new Promise(resolve=>setTimeout(resolve,160));
         const {melSpec, mn, rng} = audioToMelSpectrogram(audioBuffer);
+
+        setProgress(66, 'Menjalankan klasifikasi audio...');
         const flat = new Float32Array(N_FRAMES * N_MELS);
         for(let t=0;t<N_FRAMES;t++){
           for(let m=0;m<N_MELS;m++) flat[t*N_MELS+m] = (melSpec[t][m]-mn)/rng;
@@ -422,6 +488,9 @@
         const probs = await pred.data();
         tensor.dispose();
         pred.dispose();
+
+        setProgress(92, 'Menyiapkan tampilan hasil...');
+        await new Promise(resolve=>setTimeout(resolve,250));
         showResult(probs);
       }catch(error){
         console.error(error);
@@ -437,16 +506,19 @@
       document.getElementById('empty-result').style.display = 'none';
       document.getElementById('result-content').style.display = 'none';
       document.getElementById('loading-result').style.display = 'block';
+      startProgress('Menyiapkan proses klasifikasi...');
       document.getElementById('hasil').scrollIntoView({behavior:'smooth', block:'start'});
     }
 
     function showEmpty(){
+      stopProgress(false);
       document.getElementById('loading-result').style.display = 'none';
       document.getElementById('result-content').style.display = 'none';
       document.getElementById('empty-result').style.display = 'block';
     }
 
     function showResult(probs){
+      stopProgress(true);
       const topIdx = Array.from(probs).indexOf(Math.max(...probs));
       const label = LABELS[topIdx];
       const info = CLASS_INFO[label];
