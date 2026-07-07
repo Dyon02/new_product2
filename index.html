@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Klasifikasi Tangisan Bayi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --primary:#0f766e;
+      --primary-2:#14b8a6;
+      --primary-dark:#115e59;
+      --soft:#ecfeff;
+      --bg:#f8fafc;
+      --card:#ffffff;
+      --line:#e2e8f0;
+      --text:#0f172a;
+      --muted:#64748b;
+      --muted-2:#94a3b8;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+      --success:#10b981;
+      --shadow:0 18px 50px rgba(15,23,42,.08);
+      --shadow-sm:0 8px 24px rgba(15,23,42,.06);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:92px}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(circle at 10% 10%,rgba(20,184,166,.13),transparent 28%),radial-gradient(circle at 88% 16%,rgba(59,130,246,.10),transparent 24%),linear-gradient(180deg,#ffffff 0%,#f8fafc 42%,#eefdfb 100%)}
+
+    .navbar-product{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+    .navbar-product .container{max-width:1180px}
+    .mobile-label{display:none}
+    .brand{font-weight:800;color:var(--text);text-decoration:none;letter-spacing:-.03em;display:flex;align-items:center;gap:.65rem;font-size:1.15rem}
+    .brand-mark{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:grid;place-items:center;color:white;box-shadow:0 10px 24px rgba(15,118,110,.25)}
+    .nav-link-product{font-size:.92rem;font-weight:700;color:var(--muted);text-decoration:none;padding:.55rem .8rem;border-radius:999px;transition:.2s}
+    .nav-link-product:hover,.nav-link-product.active{color:var(--primary);background:#f0fdfa}
+    .btn-pill{border:0;border-radius:999px;background:var(--primary);color:white;font-weight:800;padding:.72rem 1.18rem;box-shadow:0 12px 26px rgba(15,118,110,.22);transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem}
+    .btn-pill:hover{background:var(--primary-dark);color:#fff;transform:translateY(-1px)}
+    .btn-pill:disabled{background:#cbd5e1;box-shadow:none;transform:none;color:#64748b;cursor:not-allowed}
+    .btn-outline-pill{border:1px solid var(--line);background:#fff;border-radius:999px;color:var(--text);font-weight:800;padding:.72rem 1.1rem;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:.2s}
+    .btn-outline-pill:hover{border-color:var(--primary);color:var(--primary);background:#f0fdfa}
+
+    section{padding:86px 0}
+    .hero{padding-top:96px;padding-bottom:70px}
+    .badge-soft{display:inline-flex;align-items:center;gap:.5rem;background:#f0fdfa;border:1px solid #99f6e4;color:var(--primary);border-radius:999px;padding:.45rem .8rem;font-weight:800;font-size:.86rem}
+    .hero-title{font-size:clamp(2.25rem,5vw,4.8rem);font-weight:800;letter-spacing:-.065em;line-height:1.02;margin:1.1rem 0;color:#071225}
+    .hero-subtitle{font-size:1.1rem;line-height:1.8;color:var(--muted);max-width:680px}
+    .hero-card{background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:30px;padding:1.2rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .hero-card:before{content:"";position:absolute;inset:auto -80px -90px auto;width:220px;height:220px;background:rgba(20,184,166,.15);border-radius:999px}
+    .hero-img{width:100%;border-radius:24px;display:block;background:#f0fdfa;border:1px solid #ccfbf1}
+    .quick-stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:1rem;box-shadow:var(--shadow-sm)}
+    .quick-stat strong{font-size:1.35rem;color:var(--primary)}
+    .quick-stat span{font-size:.85rem;color:var(--muted);display:block;margin-top:.15rem}
+
+    .section-title{font-size:clamp(1.8rem,3vw,2.55rem);font-weight:800;letter-spacing:-.045em;margin-bottom:.65rem}
+    .section-desc{color:var(--muted);line-height:1.75;max-width:750px;margin-bottom:2rem}
+    .app-card{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:1.25rem}
+    .app-card-lg{padding:1.55rem}
+    .card-title-custom{font-size:1.15rem;font-weight:800;display:flex;align-items:center;gap:.55rem;margin-bottom:1rem;color:#111827}
+    .card-title-custom i{color:var(--primary)}
+
+    .audio-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;max-height:520px;overflow:auto;padding-right:.35rem}
+    .audio-item{border:1px solid var(--line);background:#fff;border-radius:18px;padding:.95rem;cursor:pointer;transition:.2s;text-align:left;width:100%}
+    .audio-item:hover{transform:translateY(-2px);border-color:#5eead4;box-shadow:0 12px 24px rgba(15,118,110,.08)}
+    .audio-item.active{background:#f0fdfa;border-color:var(--primary);box-shadow:0 12px 28px rgba(15,118,110,.14)}
+    .audio-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;gap:.5rem}
+    .audio-number{font-weight:800;color:var(--text)}
+    .audio-status{font-size:.72rem;font-weight:800;color:var(--muted);background:#f1f5f9;border-radius:999px;padding:.25rem .55rem;white-space:nowrap}
+    .audio-item.active .audio-status{background:#ccfbf1;color:var(--primary)}
+    .audio-desc{font-size:.82rem;color:var(--muted);line-height:1.5}
+    .selected-box{border:1px solid #99f6e4;background:#f0fdfa;border-radius:20px;padding:1rem;margin-bottom:1rem}
+    .selected-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);font-weight:800;margin-bottom:.2rem}
+    .selected-name{font-weight:800;font-size:1.05rem;color:#0f172a}
+    audio{width:100%;height:42px;margin-top:.85rem}
+    .info-note{display:flex;gap:.65rem;color:#0f766e;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:18px;padding:.9rem;font-size:.9rem;line-height:1.55}
+
+    .result-panel{position:sticky;top:92px;min-height:480px;display:flex;flex-direction:column;justify-content:center}
+    .empty-result{text-align:center;color:var(--muted);padding:2.5rem 1rem}
+    .empty-icon{width:82px;height:82px;border-radius:30px;background:#f1f5f9;color:#94a3b8;display:grid;place-items:center;font-size:2rem;margin:0 auto 1rem}
+    .loading-box{text-align:center;display:none;padding:2rem 1rem}
+    .loader{width:56px;height:56px;border-radius:50%;border:5px solid #ccfbf1;border-top-color:var(--primary);animation:spin 1s linear infinite;margin:0 auto 1rem}@keyframes spin{to{transform:rotate(360deg)}}
+    .result-content{display:none}
+    .result-image{width:100%;max-width:390px;display:block;margin:0 auto 1.25rem;border-radius:24px;border:1px solid #ccfbf1;background:#f8fafc}
+    .result-badge{display:inline-flex;align-items:center;gap:.45rem;background:#ecfeff;color:var(--primary);border:1px solid #99f6e4;border-radius:999px;padding:.4rem .7rem;font-weight:800;font-size:.84rem;margin-bottom:.75rem}
+    .result-name{font-size:2.25rem;font-weight:800;letter-spacing:-.04em;margin-bottom:.35rem;text-align:center;color:#0f172a}
+    .confidence{font-size:1rem;text-align:center;color:var(--muted);font-weight:700;margin-bottom:1rem}
+    .guidance-card{background:#f8fafc;border:1px solid var(--line);border-radius:18px;padding:1rem;margin-top:1rem}
+    .guidance-title{font-weight:800;margin-bottom:.55rem;display:flex;align-items:center;gap:.5rem}.guidance-title i{color:var(--primary)}
+    .guidance-list{margin:0;padding-left:1.1rem;color:var(--muted);line-height:1.75;font-size:.95rem}
+    .medical-note{font-size:.82rem;line-height:1.6;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:16px;padding:.85rem;margin-top:1rem}
+
+    .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+    .step-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:1.2rem;box-shadow:var(--shadow-sm)}
+    .step-icon{width:42px;height:42px;border-radius:15px;background:#f0fdfa;color:var(--primary);display:grid;place-items:center;font-size:1.2rem;margin-bottom:.85rem}
+    .step-title{font-weight:800;margin-bottom:.45rem}.step-desc{color:var(--muted);font-size:.92rem;line-height:1.65;margin:0}
+    .footer{background:#0f172a;color:white;padding:34px 0}.footer small{color:#cbd5e1}.footer .creator{font-weight:800;color:#fff}.footer a{color:#99f6e4;text-decoration:none;font-weight:700}
+
+    @media(max-width:991.98px){
+      .navbar-product{padding-top:.65rem!important;padding-bottom:.65rem!important}
+      .navbar-product .container{display:grid!important;grid-template-columns:1fr;gap:.65rem!important;justify-items:center}
+      .brand{font-size:1.08rem;justify-content:center;text-align:center}
+      .nav-links{display:flex!important;width:100%;max-width:100%;justify-content:center;gap:.45rem!important;overflow-x:auto;white-space:nowrap;padding:.15rem .25rem .25rem;scrollbar-width:none}
+      .nav-links::-webkit-scrollbar{display:none}
+      .nav-link-product{font-size:.88rem;padding:.5rem .68rem;flex:0 0 auto;background:rgba(255,255,255,.72);border:1px solid transparent}
+      .nav-link-product.active{border-color:#99f6e4}
+      .navbar-product .btn-pill{display:none}
+      .result-panel{position:relative;top:0}.audio-list{max-height:none}.hero{text-align:center}.hero-subtitle{margin-left:auto;margin-right:auto}.steps{grid-template-columns:1fr}
+    }
+    @media(max-width:575.98px){
+      html{scroll-padding-top:122px}
+      section{padding:58px 0}.hero{padding-top:62px}.audio-list{grid-template-columns:1fr}.app-card-lg{padding:1rem}.result-name{font-size:1.8rem}
+      .brand{font-size:1rem;gap:.5rem}.brand-mark{width:34px;height:34px;border-radius:12px}
+      .nav-links{justify-content:flex-start;padding-left:.25rem;padding-right:.25rem}
+      .nav-link-product{font-size:.82rem;padding:.46rem .58rem}
+      .desktop-label{display:none}.mobile-label{display:inline}
+      .hero-title{font-size:clamp(2rem,11vw,3.25rem);letter-spacing:-.055em;line-height:1.05}
+      .hero-subtitle{font-size:1rem;line-height:1.75}
+    }
+    @media(max-width:380px){
+      .brand{font-size:.95rem}.brand-mark{width:32px;height:32px}
+      .nav-link-product{font-size:.78rem;padding:.42rem .52rem}
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar-product py-3">
+    <div class="container d-flex align-items-center justify-content-between gap-3">
+      <a class="brand" href="#beranda"><span class="brand-mark"><i class="bi bi-soundwave"></i></span><span>Klasifikasi Tangisan</span></a>
+      <div class="nav-links d-flex align-items-center gap-1">
+        <a class="nav-link-product" href="#beranda">Beranda</a>
+        <a class="nav-link-product" href="#pilih-audio"><span class="desktop-label">Pilih Audio</span><span class="mobile-label">Audio</span></a>
+        <a class="nav-link-product" href="#hasil">Hasil</a>
+        <a class="nav-link-product" href="#informasi"><span class="desktop-label">Informasi</span><span class="mobile-label">Info</span></a>
+      </div>
+      <a class="btn-pill" href="#pilih-audio"><i class="bi bi-play-circle-fill"></i> Coba Sekarang</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero" id="beranda">
+      <div class="container">
+        <div class="row align-items-center g-5">
+          <div class="col-lg-7">
+            <span class="badge-soft"><i class="bi bi-check-circle-fill"></i> Sistem siap digunakan</span>
+            <h1 class="hero-title">Kenali jenis tangisan bayi dari contoh audio.</h1>
+            <p class="hero-subtitle">Pilih salah satu audio yang tersedia, dengarkan bila diperlukan, lalu jalankan proses klasifikasi untuk melihat perkiraan kelas tangisan bayi.</p>
+            <div class="d-flex flex-wrap gap-3 mt-4 justify-content-lg-start justify-content-center">
+              <a href="#pilih-audio" class="btn-pill"><i class="bi bi-music-note-list"></i> Pilih Audio</a>
+              <a href="#hasil" class="btn-outline-pill"><i class="bi bi-clipboard-check"></i> Lihat Hasil</a>
+            </div>
+            <div class="row g-3 mt-4">
+              <div class="col-sm-4"><div class="quick-stat"><strong>5</strong><span>Kelas tangisan</span></div></div>
+              <div class="col-sm-4"><div class="quick-stat"><strong>20</strong><span>Contoh audio</span></div></div>
+              <div class="col-sm-4"><div class="quick-stat"><strong>Browser</strong><span>Tanpa backend</span></div></div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="hero-card">
+              <img class="hero-img" src="assets/class_images/placeholder.svg" alt="Ilustrasi sistem klasifikasi tangisan bayi" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pilih-audio">
+      <div class="container">
+        <h2 class="section-title">Pilih audio tangisan bayi</h2>
+        <p class="section-desc">Bagian ini berisi daftar audio yang sudah disediakan sebagai input. Pilih satu audio, kemudian tekan tombol klasifikasi.</p>
+        <div class="row g-4 align-items-start">
+          <div class="col-lg-7">
+            <div class="app-card app-card-lg">
+              <div class="card-title-custom"><i class="bi bi-music-note-beamed"></i> Daftar Audio</div>
+              <div id="audio-list" class="audio-list"></div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="app-card app-card-lg">
+              <div class="card-title-custom"><i class="bi bi-play-btn-fill"></i> Audio Terpilih</div>
+              <div class="selected-box" id="selected-box">
+                <div class="selected-label">Belum dipilih</div>
+                <div class="selected-name" id="selected-name">Silakan pilih salah satu audio dari daftar.</div>
+                <audio id="audio-player" controls style="display:none"></audio>
+              </div>
+              <div class="info-note mb-3"><i class="bi bi-info-circle-fill"></i><span>Gunakan tombol putar untuk mendengarkan audio. Setelah audio terpilih dan berhasil dimuat, tombol klasifikasi akan aktif.</span></div>
+              <button class="btn-pill w-100 justify-content-center" id="classify-btn" disabled><i class="bi bi-search"></i> Klasifikasi Audio</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="hasil">
+      <div class="container">
+        <h2 class="section-title">Hasil klasifikasi</h2>
+        <p class="section-desc">Hasil utama ditampilkan dalam bentuk kelas tangisan, nilai confidence, gambar ilustrasi sesuai kelas, dan saran penanganan awal.</p>
+        <div class="app-card app-card-lg result-panel">
+          <div class="empty-result" id="empty-result">
+            <div class="empty-icon"><i class="bi bi-clipboard2-check"></i></div>
+            <h5 class="fw-bold">Belum ada hasil</h5>
+            <p class="mb-0">Pilih audio pada bagian sebelumnya, lalu tekan tombol klasifikasi.</p>
+          </div>
+          <div class="loading-box" id="loading-result">
+            <div class="loader"></div>
+            <h5 class="fw-bold">Memproses audio...</h5>
+            <p class="text-muted mb-0">Mohon tunggu beberapa detik.</p>
+          </div>
+          <div class="result-content" id="result-content">
+            <div class="text-center">
+              <img id="result-image" class="result-image" src="assets/class_images/placeholder.svg" alt="Ilustrasi hasil klasifikasi" />
+              <span class="result-badge"><i class="bi bi-clipboard-check-fill"></i> Hasil Klasifikasi</span>
+              <div class="result-name" id="result-name">-</div>
+              <div class="confidence" id="result-confidence">Confidence: -</div>
+            </div>
+            <div class="guidance-card">
+              <div class="guidance-title"><i class="bi bi-heart-pulse-fill"></i> Catatan penanganan awal</div>
+              <ul class="guidance-list" id="guidance-list"></ul>
+            </div>
+            <div class="medical-note"><strong>Catatan:</strong> Hasil ini merupakan prediksi sistem dari audio yang dipilih dan tidak menggantikan pemeriksaan tenaga kesehatan.</div>
+            <div class="d-flex flex-wrap gap-2 justify-content-center mt-3">
+              <a class="btn-outline-pill" href="#pilih-audio"><i class="bi bi-arrow-left-circle"></i> Pilih Audio Lain</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="informasi">
+      <div class="container">
+        <h2 class="section-title">Cara kerja singkat</h2>
+        <p class="section-desc">Web ini dibuat sebagai tampilan produk sederhana. Pengguna cukup memilih audio yang tersedia, lalu sistem menampilkan hasil kelas tangisan bayi.</p>
+        <div class="steps">
+          <div class="step-card"><div class="step-icon"><i class="bi bi-1-circle-fill"></i></div><div class="step-title">Pilih Audio</div><p class="step-desc">Pilih salah satu file audio tangisan bayi yang sudah disediakan pada daftar input.</p></div>
+          <div class="step-card"><div class="step-icon"><i class="bi bi-2-circle-fill"></i></div><div class="step-title">Proses Klasifikasi</div><p class="step-desc">Sistem membaca pola suara pada audio terpilih dan memprosesnya langsung di browser.</p></div>
+          <div class="step-card"><div class="step-icon"><i class="bi bi-3-circle-fill"></i></div><div class="step-title">Tampilkan Hasil</div><p class="step-desc">Hasil ditampilkan sebagai kelas tangisan, confidence, gambar ilustrasi, dan catatan penanganan awal.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-center text-md-start">
+      <div>
+        <div class="creator">Sistem Klasifikasi Tangisan Bayi</div>
+        <small>Dibuat oleh David Yoga Wicaksono</small>
+      </div>
+      <div><small><a href="#beranda">Beranda</a> · <a href="#pilih-audio">Pilih Audio</a> · <a href="#hasil">Hasil</a></small></div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script>
+    const SR = 22050, DURATION = 5.0, N_MELS = 128, N_FFT = 2048, HOP = 512, N_FRAMES = 216;
+    const LABELS = ["belly_pain", "burping", "discomfort", "hungry", "tired"];
+    const MODEL_PATH = "cnn_lstm/model.json";
+
+    const AUDIO_SAMPLES = Array.from({length:20}, (_,i)=>({
+      id:i+1,
+      title:`Audio Tangisan ${String(i+1).padStart(2,'0')}`,
+      file:`audio_samples/sample-${String(i+1).padStart(2,'0')}.mp3`
+    }));
+
+    const CLASS_INFO = {
+      belly_pain:{label:"Sakit Perut", image:"assets/class_images/belly_pain.svg", tips:["Tenangkan bayi dan cek kondisi perutnya.","Bantu dengan pijatan lembut searah jarum jam.","Segera konsultasi ke tenaga kesehatan bila tangisan tidak berhenti atau disertai gejala lain."]},
+      burping:{label:"Ingin Bersendawa", image:"assets/class_images/burping.svg", tips:["Posisikan bayi tegak setelah menyusu.","Tepuk punggung bayi secara perlahan.","Ulangi beberapa menit sampai bayi merasa lebih nyaman."]},
+      discomfort:{label:"Tidak Nyaman", image:"assets/class_images/discomfort.svg", tips:["Periksa popok, suhu ruangan, dan posisi tubuh bayi.","Pastikan pakaian tidak terlalu ketat.","Gendong dan tenangkan bayi di tempat yang nyaman."]},
+      hungry:{label:"Lapar", image:"assets/class_images/hungry.svg", tips:["Berikan ASI atau susu sesuai kebutuhan bayi.","Perhatikan tanda lapar sebelum bayi menangis keras.","Pastikan bayi berada pada posisi menyusu yang nyaman."]},
+      tired:{label:"Lelah", image:"assets/class_images/tired.svg", tips:["Bawa bayi ke tempat yang lebih tenang.","Redupkan cahaya dan kurangi suara bising.","Bantu bayi beristirahat dengan rutinitas tidur yang nyaman."]}
+    };
+
+    let model = null;
+    let audioBuffer = null;
+    let selectedAudio = null;
+
+    const audioListEl = document.getElementById('audio-list');
+    const selectedNameEl = document.getElementById('selected-name');
+    const audioPlayerEl = document.getElementById('audio-player');
+    const classifyBtn = document.getElementById('classify-btn');
+
+    function renderAudioList(){
+      audioListEl.innerHTML = AUDIO_SAMPLES.map(item => `
+        <button type="button" class="audio-item" data-audio-id="${item.id}">
+          <div class="audio-item-head">
+            <span class="audio-number">${item.title}</span>
+            <span class="audio-status">Pilih</span>
+          </div>
+          <div class="audio-desc">Klik untuk menggunakan audio ini sebagai input klasifikasi.</div>
+        </button>
+      `).join('');
+      document.querySelectorAll('[data-audio-id]').forEach(button=>{
+        button.addEventListener('click',()=>selectAudio(Number(button.dataset.audioId)));
+      });
+    }
+
+    async function loadMainModel(){
+      try{
+        model = await tf.loadLayersModel(MODEL_PATH);
+        return model;
+      }catch(error){
+        console.error(error);
+        alert('Model klasifikasi gagal dimuat. Pastikan folder cnn_lstm berada satu lokasi dengan index.html.');
+        return null;
+      }
+    }
+
+    async function selectAudio(id){
+      const item = AUDIO_SAMPLES.find(a=>a.id===id);
+      if(!item) return;
+      selectedAudio = item;
+      classifyBtn.disabled = true;
+      classifyBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Memuat Audio...';
+      document.querySelectorAll('.audio-item').forEach(btn=>{
+        btn.classList.toggle('active', Number(btn.dataset.audioId)===id);
+        btn.querySelector('.audio-status').textContent = Number(btn.dataset.audioId)===id ? 'Terpilih' : 'Pilih';
+      });
+      selectedNameEl.textContent = item.title;
+      audioPlayerEl.src = item.file;
+      audioPlayerEl.style.display = 'block';
+
+      try{
+        const response = await fetch(item.file);
+        if(!response.ok) throw new Error('File audio tidak ditemukan');
+        const arrayBuffer = await response.arrayBuffer();
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContextClass();
+        audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
+        classifyBtn.disabled = false;
+        classifyBtn.innerHTML = '<i class="bi bi-search"></i> Klasifikasi Audio';
+      }catch(error){
+        console.error(error);
+        audioBuffer = null;
+        classifyBtn.disabled = true;
+        classifyBtn.innerHTML = '<i class="bi bi-search"></i> Klasifikasi Audio';
+        alert('Audio gagal dimuat. Coba pilih audio lain atau muat ulang halaman.');
+      }
+    }
+
+    function audioToMelSpectrogram(buf){
+      const rawData = buf.getChannelData(0);
+      const targetLen = Math.round(SR * DURATION);
+      const y = new Float32Array(targetLen);
+      const ratio = rawData.length / targetLen;
+      for(let i=0;i<targetLen;i++) y[i] = rawData[Math.min(Math.floor(i*ratio), rawData.length-1)] || 0;
+
+      const frames = [];
+      for(let s=0;s+N_FFT<=targetLen;s+=HOP){
+        const frame = new Float32Array(N_FFT);
+        for(let i=0;i<N_FFT;i++){
+          const win = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N_FFT - 1));
+          frame[i] = y[s+i] * win;
+        }
+        const mag = new Float32Array(N_FFT/2 + 1);
+        for(let k=0;k<=N_FFT/2;k++){
+          let re=0, im=0;
+          for(let n=0;n<N_FFT;n++){
+            const a = -2 * Math.PI * k * n / N_FFT;
+            re += frame[n] * Math.cos(a);
+            im += frame[n] * Math.sin(a);
+          }
+          mag[k] = re*re + im*im;
+        }
+        frames.push(mag);
+      }
+
+      function hzToMel(f){return 2595 * Math.log10(1 + f/700)}
+      function melToHz(m){return 700 * (Math.pow(10, m/2595) - 1)}
+      const melMin = hzToMel(0), melMax = hzToMel(SR/2);
+      const melPts = Array.from({length:N_MELS+2}, (_,i)=>melMin + (melMax-melMin)*i/(N_MELS+1));
+      const binPts = melPts.map(m=>Math.floor(melToHz(m)/SR*N_FFT));
+      const melSpec = frames.map(frame=>{
+        const mel = new Float32Array(N_MELS);
+        for(let m=0;m<N_MELS;m++){
+          let sum=0;
+          const lo=binPts[m], mid=binPts[m+1], hi=binPts[m+2];
+          for(let b=lo;b<hi;b++){
+            if(b<0 || b>=frame.length) continue;
+            const w = b < mid ? (b-lo)/(mid-lo+1e-8) : (hi-b)/(hi-mid+1e-8);
+            sum += frame[b] * w;
+          }
+          mel[m] = Math.max(sum, 1e-10);
+        }
+        return mel;
+      });
+
+      melSpec.forEach(row=>{for(let i=0;i<row.length;i++) row[i]=10*Math.log10(row[i]);});
+      while(melSpec.length<N_FRAMES) melSpec.push(new Float32Array(N_MELS));
+      melSpec.splice(N_FRAMES);
+
+      let mn=Infinity, mx=-Infinity;
+      melSpec.forEach(row=>row.forEach(v=>{if(v<mn)mn=v;if(v>mx)mx=v;}));
+      const rng = mx - mn + 1e-8;
+      return {melSpec, mn, rng};
+    }
+
+    async function classifyAudio(){
+      if(!audioBuffer) return;
+      if(!model){
+        classifyBtn.disabled = true;
+        classifyBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menyiapkan Sistem...';
+        await loadMainModel();
+      }
+      if(!model) return;
+
+      showLoading();
+      classifyBtn.disabled = true;
+      classifyBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Memproses...';
+      await new Promise(resolve=>setTimeout(resolve,120));
+
+      try{
+        const {melSpec, mn, rng} = audioToMelSpectrogram(audioBuffer);
+        const flat = new Float32Array(N_FRAMES * N_MELS);
+        for(let t=0;t<N_FRAMES;t++){
+          for(let m=0;m<N_MELS;m++) flat[t*N_MELS+m] = (melSpec[t][m]-mn)/rng;
+        }
+        const tensor = tf.tensor4d(flat, [1, N_FRAMES, N_MELS, 1]);
+        const pred = model.predict(tensor);
+        const probs = await pred.data();
+        tensor.dispose();
+        pred.dispose();
+        showResult(probs);
+      }catch(error){
+        console.error(error);
+        alert('Terjadi kesalahan saat klasifikasi audio.');
+        showEmpty();
+      }finally{
+        classifyBtn.disabled = false;
+        classifyBtn.innerHTML = '<i class="bi bi-search"></i> Klasifikasi Audio';
+      }
+    }
+
+    function showLoading(){
+      document.getElementById('empty-result').style.display = 'none';
+      document.getElementById('result-content').style.display = 'none';
+      document.getElementById('loading-result').style.display = 'block';
+      document.getElementById('hasil').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    function showEmpty(){
+      document.getElementById('loading-result').style.display = 'none';
+      document.getElementById('result-content').style.display = 'none';
+      document.getElementById('empty-result').style.display = 'block';
+    }
+
+    function showResult(probs){
+      const topIdx = Array.from(probs).indexOf(Math.max(...probs));
+      const label = LABELS[topIdx];
+      const info = CLASS_INFO[label];
+      const conf = (probs[topIdx] * 100).toFixed(1);
+      document.getElementById('loading-result').style.display = 'none';
+      document.getElementById('empty-result').style.display = 'none';
+      document.getElementById('result-content').style.display = 'block';
+      document.getElementById('result-image').src = info.image;
+      document.getElementById('result-image').alt = `Ilustrasi bayi: ${info.label}`;
+      document.getElementById('result-name').textContent = info.label;
+      document.getElementById('result-confidence').textContent = `Confidence: ${conf}%`;
+      document.getElementById('guidance-list').innerHTML = info.tips.map(tip=>`<li>${tip}</li>`).join('');
+    }
+
+    function activateMenuOnScroll(){
+      const sections = ['beranda','pilih-audio','hasil','informasi'];
+      const links = document.querySelectorAll('.nav-link-product');
+      let current = sections[0];
+      sections.forEach(id=>{
+        const el = document.getElementById(id);
+        if(el && window.scrollY >= el.offsetTop - 120) current = id;
+      });
+      links.forEach(link=>link.classList.toggle('active', link.getAttribute('href') === `#${current}`));
+    }
+
+    renderAudioList();
+    classifyBtn.addEventListener('click', classifyAudio);
+    window.addEventListener('scroll', activateMenuOnScroll);
+    activateMenuOnScroll();
+    loadMainModel();
+  </script>
+</body>
+</html>

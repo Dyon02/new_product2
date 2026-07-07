@@ -1,0 +1,15 @@
+Catatan revisi berdasarkan saran dosen pembimbing terbaru:
+
+1. Chatbot/Asisten Panduan Sistem dihapus.
+2. Fitur upload dan rekam audio diganti menjadi daftar audio yang sudah disediakan.
+3. UI disederhanakan agar tidak terlalu ramai dan tidak mengarah ke tampilan penelitian.
+4. Menu bagian atas diperbaiki menjadi Beranda, Pilih Audio, Hasil, dan Informasi.
+5. Tampilan dibuat menjorok ke bawah per bagian/section, dan menu digunakan untuk menggulir ke bagian tersebut.
+6. Footer ditambahkan nama pembuat.
+7. Hasil klasifikasi ditambahkan gambar ilustrasi bayi sesuai kelas hasil prediksi.
+8. Tampilan diarahkan menjadi produk jadi sederhana: pilih audio, proses klasifikasi, dan tampilkan hasil.
+
+Catatan teknis:
+- Model tetap menggunakan folder cnn_lstm/model.json.
+- Audio input berada pada folder audio_samples.
+- Halaman tetap bisa di-hosting di GitHub Pages.

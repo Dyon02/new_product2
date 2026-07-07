@@ -1,0 +1,14 @@
+CATATAN PERBAIKAN NAVBAR HP
+
+Perubahan yang dilakukan:
+1. Navbar bagian atas diperbaiki agar tidak melebar keluar layar HP.
+2. Menu tetap ditampilkan di bagian atas dan bisa digunakan untuk menggulir ke setiap bagian halaman.
+3. Pada layar HP, menu dibuat lebih ringkas:
+   - Pilih Audio menjadi Audio
+   - Informasi menjadi Info
+4. Tombol Coba Sekarang disembunyikan pada layar HP agar header tidak terlalu penuh.
+5. Brand/logo dibuat lebih rapi dan menu dibuat bisa menyesuaikan lebar layar.
+6. Fungsi klasifikasi, model, audio samples, dan hasil klasifikasi tidak diubah.
+
+File utama yang diubah:
+- index.html
